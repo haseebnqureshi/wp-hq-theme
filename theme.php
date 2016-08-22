@@ -28,6 +28,7 @@
 			add_filter('acf/settings/save_json', array($this, 'acf_json_save_point'));
 			add_filter('acf/settings/show_admin', ($this->acf_show_admin ? '__return_true' : '__return_false'));
 			include_once("{$this->dir}/acf/acf.php");
+			if (function_exists('acf_add_options_page')) { acf_add_options_page(); }
 
 			$this->post_types = $this->_scanfiles("{$this->localdir}/cpt");
 
@@ -73,13 +74,13 @@
 			if (file_exists("{$this->localdir}/assets/css/theme.css")) {
 				wp_enqueue_style(
 					basename($this->localdir), 
-					plugins_url('assets/css/theme.css', $this->localfile)
+					get_stylesheet_directory_uri() . '/assets/css/theme.css'
 				);
 			}
 			if (file_exists("{$this->localdir}/assets/js/theme.js")) {
 				wp_enqueue_script(
 					basename($this->localdir), 
-					plugins_url('assets/js/theme.js', $this->localfile),
+					get_stylesheet_directory_uri() . '/assets/js/theme.js',
 					array('underscore', 'jquery'),
 					'1.0.0',
 					true
