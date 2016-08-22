@@ -1,19 +1,16 @@
 <?php
 
 	/* 
-	HQ_Base
+	HQ_Theme
 	============
 	Include this script once and then instantiate the class. 
-	It provides a starting point for any robust plugin that 
-	needs template overrides with advanced custom fields UI.
 	*/
 
-	class HQ_Base {
+	class HQ_Theme {
 
 		public $dir = "";
 		public $localfile = "";
 		public $localdir = "";
-		public $activation_scripts = array();
 		public $post_types = array();
 		public $acf_show_admin = false;
 
@@ -33,13 +30,10 @@
 			include_once("{$this->dir}/acf/acf.php");
 
 			$this->post_types = $this->_scanfiles("{$this->localdir}/cpt");
-			$this->activation_scripts = $this->_scanfiles("{$this->localdir}/activate");
 
 			add_action('init', array($this, 'init'), 0);
 			add_filter('upload_mimes', array($this, 'filter_upload_types'));
-			add_filter('template_include', array($this, 'filter_templates'), 99, 1);
 			add_filter('wp_enqueue_scripts', array($this, 'include_assets'));
-			register_activation_hook(__FILE__, array($this, 'on_activation'));
 		}
 
 		public function acf_settings_path() {
@@ -47,18 +41,11 @@
 		}
 
 		public function acf_settings_dir() {
-			return plugins_url('acf/', __FILE__);
+			return get_stylesheet_directory_uri() . '/acf/';
 		}
 
 		public function acf_json_save_point() {
 			return "{$this->dir}/acf-json/";
-		}
-
-		public function filter_templates($original) {
-			global $post;
-			$single = is_single() ? '-single' : '';
-			$path = "{$this->localdir}/templates/{$post->post_type}{$single}.php";
-			return file_exists($path) ? $path : $original;
 		}
 
 		public function filter_upload_types($mimes) {
@@ -83,16 +70,16 @@
 		}
 
 		public function include_assets() {
-			if (file_exists("{$this->localdir}/assets/css/plugin.css")) {
+			if (file_exists("{$this->localdir}/assets/css/theme.css")) {
 				wp_enqueue_style(
 					basename($this->localdir), 
-					plugins_url('assets/css/plugin.css', $this->localfile)
+					plugins_url('assets/css/theme.css', $this->localfile)
 				);
 			}
-			if (file_exists("{$this->localdir}/assets/js/plugin.js")) {
+			if (file_exists("{$this->localdir}/assets/js/theme.js")) {
 				wp_enqueue_script(
 					basename($this->localdir), 
-					plugins_url('assets/js/plugin.js', $this->localfile),
+					plugins_url('assets/js/theme.js', $this->localfile),
 					array('underscore', 'jquery'),
 					'1.0.0',
 					true
@@ -103,10 +90,6 @@
 		public function init() {
 			date_default_timezone_set(get_option('timezone_string') || 'America/New_York');
 			$this->_loadall($this->post_types);
-		}
-
-		public function on_activation() {
-			$this->_loadall($this->activation_scripts);
 		}
 
 		/* utility methods */
